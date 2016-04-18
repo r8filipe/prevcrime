@@ -2,10 +2,10 @@
     <ion-header-bar class="bar-stable">
         <h1 class="title">Reportar</h1>
     </ion-header-bar>
-    <ion-content>
+    <ion-content style="overflow-y:scroll;">
         <div class="padding" style="margin-top:60px; overflow-y:scroll;">
             <label class="item item-input">
-                <input type="text" placeholder="Rua" ng-model="data.rua">
+                <input type="text" placeholder="Rua" ng-model="data.address">
             </label>
             <label class="item item-input">
                 <input type="text" placeholder="Coordenadas" ng-model="data.coordenadas"
@@ -29,7 +29,7 @@
                 <div class="input-label">
                     Categoria
                 </div>
-                <select ng-model="data.categoria" id="categoria">
+                <select ng-model="data.category" id="categoria">
                     <option value="1">Acessibilidade</option>
                     <option value="2">Condições Ambientais</option>
                     <option value="3">Controlo e Vigilância</option>
@@ -41,12 +41,12 @@
                 <div class="input-label">
                     Sub-Categoria
                 </div>
-                <select ng-model="data.subcategoria" id="subcategoria">
+                <select ng-model="data.event" id="subcategoria">
 
                 </select>
             </label>
             <label class="item item-input">
-                <textarea placeholder="Observações" name="observacoes" ng-model="data.observacoes"></textarea>
+                <textarea placeholder="Observações" name="observacoes" ng-model="data.obs"></textarea>
             </label>
             <div>
                 <div class="text-left" id="placehere" ng-bind-html="photo">

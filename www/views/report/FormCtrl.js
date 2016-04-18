@@ -12,15 +12,15 @@ angular.module('starter')
                 $http.get('http://nominatim.openstreetmap.org/reverse?format=json&lat=' + $stateParams.lat + '&lon=' + $stateParams.lng + '&zoom=18&addressdetails=1')
                     .success(function (response) {
                         $scope.stories = angular.fromJson(response.address);
-                        $scope.data.rua = $scope.stories.road;
-                        $scope.data.rua += ' , ';
-                        $scope.data.rua += $scope.stories.city_district;
-                        $scope.data.rua += ' , ';
-                        $scope.data.rua += $scope.stories.county;
-                        $scope.data.rua += ' , ';
-                        $scope.data.rua += $scope.stories.postcode;
-                        $scope.data.rua += ' , ';
-                        $scope.data.rua += $scope.stories.country;
+                        $scope.data.address = $scope.stories.road;
+                        $scope.data.address += ' , ';
+                        $scope.data.address += $scope.stories.city_district;
+                        $scope.data.address += ' , ';
+                        $scope.data.address += $scope.stories.county;
+                        $scope.data.address += ' , ';
+                        $scope.data.address += $scope.stories.postcode;
+                        $scope.data.address += ' , ';
+                        $scope.data.address += $scope.stories.country;
                     });
 
                 $scope.data.coordenadas = $stateParams.lat + ',' + $stateParams.lng;
@@ -33,7 +33,8 @@ angular.module('starter')
                     destinationType: Camera.DestinationType.FILE_URI,
                     sourceType: Camera.PictureSourceType.CAMERA,
                     correctOrientation: true,
-                    saveToPhotoAlbum: true
+                    saveToPhotoAlbum: true,
+                    targetWidth: 500,
                 };
                 $cordovaCamera.getPicture(options).then(function (imageFullPath) {
                     $scope.image = imageFullPath;
@@ -41,13 +42,6 @@ angular.module('starter')
                         $scope.photo.push('<img id="imageFile" src="' + imageFullPath + '" width="160px" height="auto"/>');
                     }
 
-                    //var image = document.getElementById('imageFile');
-                    //var placehere = document.getElementById('placehere');
-                    //image.src = imageFullPath;
-                    //
-                    //var keyEl = angular.element('<img id="imageFile" src="' + imageFullPath + '" width="160px" height="auto"/>');
-                    //placehere.append(keyEl);
-                    ////$compile(keyEl)(scope);
 
                 }, function (error) {
                     console.warn("PICTURE ERROR: " + angular.toJson(error));
@@ -55,35 +49,31 @@ angular.module('starter')
             };
             $scope.submit = function () {
 
-                //$http.get('http://192.168.2.101:8000/webservice/report', {params: $scope.data}).then(function (success) {
-                //    uploadFile($scope.photo);
-                //    console.log("Success: " + angular.toJson(success));
-                //}, function (error) {
-                //    console.warn("Error: " + angular.toJson(error));
-                //});
                 $http({
                     method: 'get',
-                    url: 'http://192.168.2.102/webservice/report',
+                    url: 'http://192.168.2.102:8080/prevcrime/webservice/report',
                     params: $scope.data
                 }).then(function successCallback(response) {
-                    if (response.data.state != 'FAIL') {
-                        $cordovaDialogs.alert('Foi reportado com sucesso a sua ocorrência', 'Ocorrência', 'OK')
+                    if (response.data.status != 'FAIL') {
+                        var id = response.data.event;
+                        uploadFile($scope.image);
+
+                    } else {
+                        $cordovaDialogs.alert('Erro ao reportar', 'Ocorrência', 'OK')
                             .then(function () {
-                                //uploadFile(imageFullPath);
-                                //uploadFile(imageFullPath, response.data.id);
                             });
                     }
 
                 }, function errorCallback(response) {
-                    $cordovaDialogs.alert(response, 'Erro ao Reportar', 'OK')
+                    $cordovaDialogs.alert(response.data.message, 'Erro ao Reportar', 'OK')
                         .then(function () {
-
                         });
-                    console.warn("Error: " + angular.toJson(response));
                 });
 
             };
-            function uploadFile(imageFullPath) {
+
+            function uploadFile(imageFullPath, id) {
+                console.warn(imageFullPath);
                 var options = {
                     fileKey: "image",
                     fileName: imageFullPath.substr(imageFullPath.lastIndexOf('/') + 1),
@@ -91,21 +81,27 @@ angular.module('starter')
                     mimeType: "image/jpg"
                 };
 
-                $cordovaFileTransfer.upload("'http://fvinha.ddns.net:8000/webservice/imageupload/", imageFullPath, options).then(function (result) {
-                    console.log(result);
-                    deleteTemporaryImageFile(imageFullPath, options.fileName);
-                }, function (error) {
-                    console.log(error);
-                });
+                $cordovaFileTransfer.upload("http://192.168.2.102:8080/prevcrime/webservice/image/" + id, imageFullPath, options)
+                    .then(function (result) {
+                        $cordovaDialogs.alert('Foi reportado com sucesso a sua ocorrência', 'Ocorrência', 'OK')
+                            .then(function () {
+                                deleteTemporaryImageFile(imageFullPath, options.fileName);
+                            });
+
+                        $scope.clean();
+                        $scope.goTo("map");
+                    }, function (error) {
+                        $cordovaDialogs.alert('Foi encontrado um erro ao enviar imagem', 'Fotogafia', 'OK')
+                            .then(function () {
+                            });
+                    });
             }
 
             function deleteTemporaryImageFile(filePath, FileName) {
                 var path = filePath.substring(0, filePath.lastIndexOf("/") + 1);
                 $cordovaFile.removeFile(path, FileName)
                     .then(function (success) {
-                        console.log("TEMPORARY FILE DELETED: " + angular.toJson(success));
                     }, function (error) {
-                        console.warn("deleteTemporaryImageFile error: " + angular.toJson(error));
                     });
             };
 
@@ -172,9 +168,11 @@ angular.module('starter')
                     .end();
 
                 $.each(categorie, function (key, value) {
-                    $('#subcategoria')
+                    $('#subcategoria ')
                         .append($('<option>', {value: key})
                             .text(value));
+                    $('#subcategoria option:last-child').attr("selected", true);
+
                 });
             };
 
