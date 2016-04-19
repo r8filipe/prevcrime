@@ -56,7 +56,7 @@ angular.module('starter')
                 }).then(function successCallback(response) {
                     if (response.data.status != 'FAIL') {
                         var id = response.data.event;
-                        uploadFile($scope.image);
+                        uploadFile($scope.image, response.data.event);
 
                     } else {
                         $cordovaDialogs.alert('Erro ao reportar', 'Ocorrência', 'OK')
@@ -91,6 +91,7 @@ angular.module('starter')
                         $scope.clean();
                         $scope.goTo("map");
                     }, function (error) {
+
                         $cordovaDialogs.alert('Foi encontrado um erro ao enviar imagem', 'Fotogafia', 'OK')
                             .then(function () {
                             });
