@@ -12,15 +12,25 @@ angular.module('starter')
                 $http.get('http://nominatim.openstreetmap.org/reverse?format=json&lat=' + $stateParams.lat + '&lon=' + $stateParams.lng + '&zoom=18&addressdetails=1')
                     .success(function (response) {
                         $scope.stories = angular.fromJson(response.address);
-                        $scope.data.address = $scope.stories.road;
-                        $scope.data.address += ' , ';
-                        $scope.data.address += $scope.stories.city_district;
-                        $scope.data.address += ' , ';
-                        $scope.data.address += $scope.stories.county;
-                        $scope.data.address += ' , ';
-                        $scope.data.address += $scope.stories.postcode;
-                        $scope.data.address += ' , ';
-                        $scope.data.address += $scope.stories.country;
+                        if ($scope.stories.road != undefined) {
+                            $scope.data.address = $scope.stories.road;
+                            $scope.data.address += ' , ';
+                        }
+                        if ($scope.stories.city_district != undefined) {
+                            $scope.data.address += $scope.stories.city_district;
+                            $scope.data.address += ' , ';
+                        }
+                        if ($scope.stories.county != undefined) {
+                            $scope.data.address += $scope.stories.county;
+                            $scope.data.address += ' , ';
+                        }
+                        if ($scope.stories.postcode != undefined) {
+                            $scope.data.address += $scope.stories.postcode;
+                            $scope.data.address += ' , ';
+                        }
+                        if ($scope.stories.country != undefined) {
+                            $scope.data.address += $scope.stories.country;
+                        }
                     });
 
                 $scope.data.coordenadas = $stateParams.lat + ',' + $stateParams.lng;
