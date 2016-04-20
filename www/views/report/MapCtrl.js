@@ -4,9 +4,8 @@ angular.module('starter')
             var map = L.map('map', {
                 center: [41.194292, -8.643424],
                 minZoom: 0,
-                zoom: 16
+                zoom: 18
             });
-            map.setView([41.106389848835605, -7.042064666748047], 15); //ratlam
             L.tileLayer('http://{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="http://osm.org/copyright" title="OpenStreetMap" target="_blank">OpenStreetMap</a> contributors | Tiles Courtesy of <a href="http://www.mapquest.com/" title="MapQuest" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png" width="16" height="16">',
                 subdomains: ['otile4']
@@ -14,17 +13,29 @@ angular.module('starter')
 
             map.locate({setView: true, maxZoom: 20});
 
-            var popup = L.popup();
-            var marker = L.marker([51.5, -0.09]).addTo(map);
+
+            function onLocationFound(e) {
+                var radius = e.accuracy / 2;
+                L.marker(e.latlng).addTo(map);
+                L.circle(e.latlng, radius).addTo(map);
+            }
+
+            map.on('locationfound', onLocationFound);
+
+            function onLocationError(e) {
+                alert(e.message);
+            }
+
+            L.marker().update(map);
+            map.on('locationerror', onLocationError);
+            map.on('dblclick', onMapClick);
+            //L.marker([41.194292, -8.643424]).addTo(map);
+            $scope.reloadRoute = function () {
+                L.marker().update(map);
+            };
 
             function onMapClick(e) {
                 window.location = "#/form/" + e.latlng.lat + '/' + e.latlng.lng;
             }
-
-            map.on('dblclick', onMapClick);
-
-            $scope.reloadRoute = function () {
-                map.locate({setView: true, maxZoom: 20});
-            };
         });
     });
