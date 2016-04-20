@@ -29,7 +29,6 @@ angular.module('starter')
             L.marker().update(map);
             map.on('locationerror', onLocationError);
             map.on('dblclick', onMapClick);
-            //L.marker([41.194292, -8.643424]).addTo(map);
             $scope.reloadRoute = function () {
                 L.marker().update(map);
             };
