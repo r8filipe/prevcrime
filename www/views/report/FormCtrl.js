@@ -5,7 +5,7 @@ angular.module('starter')
                                       $cordovaNetwork, $cordovaDialogs) {
         $ionicPlatform.ready(function () {
             $scope.photo = [];
-            $scope.image;
+            $scope.image = [];
             $scope.data = {};
             if ($stateParams.lat != undefined) {
 
@@ -37,8 +37,9 @@ angular.module('starter')
                     targetWidth: 500,
                 };
                 $cordovaCamera.getPicture(options).then(function (imageFullPath) {
-                    $scope.image = imageFullPath;
+
                     if ($scope.photo.length <= 3) {
+                        $scope.image.push(imageFullPath);
                         $scope.photo.push('<img id="imageFile" src="' + imageFullPath + '" width="160px" height="auto"/>');
                     }
 
@@ -49,27 +50,42 @@ angular.module('starter')
             };
             $scope.submit = function () {
 
-                $http({
-                    method: 'get',
-                    url: 'http://192.168.2.102:8080/prevcrime/webservice/report',
-                    params: $scope.data
-                }).then(function successCallback(response) {
-                    if (response.data.status != 'FAIL') {
-                        var id = response.data.event;
-                        uploadFile($scope.image, response.data.event);
+                if ($scope.data.event == 0 || $scope.data.length <= 4 || $scope.photo.length == 0) {
+                    $cordovaDialogs.alert('Campos não preenchidos', 'Formulário', 'OK')
+                        .then(function () {
+                            return;
+                        });
 
-                    } else {
-                        $cordovaDialogs.alert('Erro ao reportar', 'Ocorrência', 'OK')
+                } else {
+                    $http({
+                        method: 'get',
+                        url: 'http://prevcrimeapp.ufp.pt/webservice/report',
+                        params: $scope.data
+                    }).then(function successCallback(response) {
+                        if (response.data.status != 'FAIL') {
+                            var id = response.data.event;
+
+                            //uploadFile($scope.image, response.data.event);
+                            angular.forEach($scope.image, function (value) {
+                                uploadFile(value, response.data.event);
+                            });
+                            $cordovaDialogs.alert('Foi reportado com sucesso a sua ocorrência', 'Ocorrência', 'OK')
+                                .then(function () {
+                                    window.location = "#/map/";
+                                });
+
+                        } else {
+                            $cordovaDialogs.alert('Erro ao reportar', 'Ocorrência', 'OK')
+                                .then(function () {
+                                });
+                        }
+
+                    }, function errorCallback(response) {
+                        $cordovaDialogs.alert(response.data.message, 'Erro ao Reportar', 'OK')
                             .then(function () {
                             });
-                    }
-
-                }, function errorCallback(response) {
-                    $cordovaDialogs.alert(response.data.message, 'Erro ao Reportar', 'OK')
-                        .then(function () {
-                        });
-                });
-
+                    });
+                }
             };
 
             function uploadFile(imageFullPath, id) {
@@ -81,18 +97,13 @@ angular.module('starter')
                     mimeType: "image/jpg"
                 };
 
-                $cordovaFileTransfer.upload("http://192.168.2.102:8080/prevcrime/webservice/image/" + id, imageFullPath, options)
+                $cordovaFileTransfer.upload("http://prevcrimeapp.ufp.pt/webservice/image/" + id, imageFullPath, options)
                     .then(function (result) {
-                        $cordovaDialogs.alert('Foi reportado com sucesso a sua ocorrência', 'Ocorrência', 'OK')
-                            .then(function () {
-                                deleteTemporaryImageFile(imageFullPath, options.fileName);
-                            });
+                        deleteTemporaryImageFile(imageFullPath, options.fileName);
 
-                        $scope.clean();
-                        $scope.goTo("map");
                     }, function (error) {
 
-                        $cordovaDialogs.alert('Foi encontrado um erro ao enviar imagem', 'Fotogafia', 'OK')
+                        $cordovaDialogs.alert("Erro ao enviar imagem", 'Fotogafia', 'OK')
                             .then(function () {
                             });
                     });
@@ -109,12 +120,11 @@ angular.module('starter')
             $("#categoria").change(function () {
 
                 var categorie = $('#categoria').find(":selected").val();
-                console.log('alteracao categoria' + categorie);
+
                 var acessibilidade = {
                     1: 'Estado dos arruamentos',
                     2: 'Estado dos passeios'
                 };
-
                 var ambiente = {
                     3: 'Lixo disperso',
                     4: 'Degradação habitaçional',
@@ -167,14 +177,17 @@ angular.module('starter')
                     .find('option')
                     .remove()
                     .end();
+                $('#subcategoria ')
+                    .append($('<option>', {value: 0})
+                        .text(''));
 
                 $.each(categorie, function (key, value) {
                     $('#subcategoria ')
                         .append($('<option>', {value: key})
                             .text(value));
-                    $('#subcategoria option:last-child').attr("selected", true);
-
+                    //$('#subcategoria option:first-child').attr("selected", true);
                 });
+
             };
 
         });

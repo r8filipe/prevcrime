@@ -18,9 +18,6 @@ angular.module('starter')
             var marker = L.marker([51.5, -0.09]).addTo(map);
 
             function onMapClick(e) {
-                popup
-                    .setLatLng(e.latlng)
-                    .openOn(map);
                 window.location = "#/form/" + e.latlng.lat + '/' + e.latlng.lng;
             }
 
