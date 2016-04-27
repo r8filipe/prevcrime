@@ -3,7 +3,7 @@ angular.module('starter')
         $ionicPlatform.ready(function () {
             var map = L.map('map', {
                 center: [41.194292, -8.643424],
-                minZoom: 0,
+                minZoom: 5,
                 zoom: 18
             });
             L.tileLayer('http://{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png', {
@@ -11,23 +11,9 @@ angular.module('starter')
                 subdomains: ['otile4']
             }).addTo(map);
 
+            map.addControl( new L.Control.Gps({autoActive:true}) );//inizialize control
+
             map.locate({setView: true, maxZoom: 20});
-
-
-            function onLocationFound(e) {
-                var radius = e.accuracy / 2;
-                L.marker(e.latlng).addTo(map);
-                L.circle(e.latlng, radius).addTo(map);
-            }
-
-            map.on('locationfound', onLocationFound);
-
-            function onLocationError(e) {
-                alert(e.message);
-            }
-
-            L.marker().update(map);
-            map.on('locationerror', onLocationError);
             map.on('dblclick', onMapClick);
             $scope.reloadRoute = function () {
                 L.marker().update(map);
@@ -36,5 +22,9 @@ angular.module('starter')
             function onMapClick(e) {
                 window.location = "#/form/" + e.latlng.lat + '/' + e.latlng.lng;
             }
+
+            $scope.reloadRoute = function () {
+                map.locate({setView: true, maxZoom: 20});
+            };
         });
     });

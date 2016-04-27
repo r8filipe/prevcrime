@@ -14,8 +14,8 @@
     font-size: 40px;
     background: blue;
     position: fixed;
-    bottom: 5%; /* Adjust to where you want it */
-    right: 20px; /* Adjust to where you want it */
+    bottom: 8vh; /* Adjust to where you want it */
+    right: 5vw; /* Adjust to where you want it */
     z-index: 9999;
 }
 
@@ -32,13 +32,28 @@
     text-align: center;
     vertical-align: middle;
     margin-top: -20px; /* Note, this must be half the font size */
-    color: hotpink;
+    color: red;
 }
 
-.float-button:hover, .content:hover {
+.float-button:active, .content:active {
     color: blue;
     background: white;
 }
-.content:hover{
+.content:active{
     background: none;
+}
+
+/* Portrait */
+@media screen and (orientation:portrait) {
+    #map{
+        height: 91vh;
+        width: auto;
+    }
+}
+/* Landscape */
+@media screen and (orientation:landscape) {
+    #map{
+        height: 84vh;
+        width: auto;
+    }
 }
